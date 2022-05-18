@@ -27,7 +27,11 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <form action="/posts/store" method="POST">
+          <form
+            action="/posts/store"
+            method="POST"
+            enctype="multipart/form-data"
+          >
             <div class="control-group">
               <div class="form-group floating-label-form-group controls">
                 <label>Title</label>
@@ -42,6 +46,19 @@
             </div>
             <div class="control-group">
               <div class="form-group floating-label-form-group controls">
+                <label>Your Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="username"
+                  id="username"
+                  name="username"
+                />
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="form-group floating-label-form-group controls">
                 <label>Description</label>
                 <textarea
                   rows="5"
@@ -51,6 +68,18 @@
                 ></textarea>
               </div>
             </div>
+            <div class="control-group">
+              <div class="form-group floating-label-form-group controls">
+                <label>Image</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="image"
+                  name="image"
+                />
+              </div>
+            </div>
+
             <br />
             <div class="form-group">
               <button
