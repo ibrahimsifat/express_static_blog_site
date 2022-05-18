@@ -52,11 +52,17 @@ app.get("/posts/new", (req, res) => {
   res.render("create");
 });
 
-//post a post
-app.post("/posts/store", async (req, res) => {
-  await BlogPost.create(req.body);
-  res.redirect("/");
+app.post("/posts/store", (req, res) => {
+  let image = req.files.image;
+  image.mv(path.resolve(__dirname, "public/img", image.name), async (error) => {
+    await BlogPost.create({
+      ...req.body,
+      image: "/img/" + image.name,
+    });
+    res.redirect("/");
+  });
 });
+
 // find post
 app.get("/post/:id", async (req, res) => {
   const blogpost = await BlogPost.findById(req.params.id);
