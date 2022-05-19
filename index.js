@@ -4,7 +4,15 @@ const ejs = require("ejs");
 const path = require("path");
 const User = require("./models/User");
 app.use(express.json());
-
+// session setting
+const expressSession = require("express-session");
+app.use(
+  expressSession({
+    secret: "keyboard cat",
+  })
+);
+// session middleware
+const authMiddleware = require("./middleware/authMiddleware");
 // file upload schema
 const BlogPost = require("./models/BlogPost");
 //image upload
@@ -42,6 +50,7 @@ app.use("/posts/store", validateMiddleWare);
 //setting routers
 app.get("/", async (req, res) => {
   const blogposts = await BlogPost.find({});
+  console.log(req.session);
   res.render("index", {
     blogposts,
   });
@@ -67,7 +76,7 @@ app.get("/posts/new", (req, res) => {
   res.render("create");
 });
 // post nre post
-app.post("/posts/store", (req, res) => {
+app.post("/posts/store", authMiddleware, (req, res) => {
   let image = req.files.image;
   image.mv(path.resolve(__dirname, "public/img", image.name), async (error) => {
     await BlogPost.create({
@@ -80,14 +89,40 @@ app.post("/posts/store", (req, res) => {
 
 // create a user by registration
 app.post("/users/register", (req, res) => {
-  User.create(req.body, (error) => {
-    console.log(error);
+  User.create(req.body, (error, user) => {
+    if (error) {
+      return res.redirect("/auth/register");
+    }
+
     res.redirect("/");
   });
 });
 //user registration
 app.get("/auth/register", (req, res) => {
   res.render("register"); // render register.ejs
+});
+// login user
+app.get("/auth/login", (req, res) => {
+  res.render("login");
+});
+app.get("/auth/login", (req, res) => {
+  const { username, password } = req.body;
+  User.findOne({ username: username }, (error, user) => {
+    if (user) {
+      bcrypt.compare(password, user.password, (error, same) => {
+        if (same) {
+          req.session.userId = user._id;
+          // if passwords match
+          // store user session, will talk about it later
+          res.redirect("/");
+        } else {
+          res.redirect("/auth/login");
+        }
+      });
+    } else {
+      res.redirect("/auth/login");
+    }
+  });
 });
 // find post
 app.get("/post/:id", async (req, res) => {
