@@ -2,6 +2,14 @@ const express = require("express");
 const app = express();
 const ejs = require("ejs");
 const path = require("path");
+const User = require("./models/User");
+app.use(express.json());
+//user registration
+const newUserController = require("./newUser");
+app.get("/auth/register", newUserController);
+const storeUserController = require("./storeUser");
+// app.post("/users/register", storeUserController);
+
 // file upload schema
 const BlogPost = require("./models/BlogPost");
 //image upload
@@ -10,8 +18,12 @@ app.use(fileUpload());
 
 //connecting mongodb
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost/my_database", { useNewUrlParser: true });
-
+mongoose
+  .connect("mongodb://localhost/my_database", { useNewUrlParser: true })
+  .then(() => {
+    console.log("database connected successfully");
+  })
+  .catch((err) => console.log(err));
 // setting template engine
 //use static file
 app.set("view engine", "ejs");
@@ -22,6 +34,14 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+//file upload validation middleware
+const validateMiddleWare = (req, res, next) => {
+  if (req.files == null || req.body.title == null || req.body.title == null) {
+    return res.redirect("/posts/new");
+  }
+  next();
+};
+app.use("/posts/store", validateMiddleWare);
 //routes
 
 //setting routers
@@ -59,6 +79,12 @@ app.post("/posts/store", (req, res) => {
       ...req.body,
       image: "/img/" + image.name,
     });
+    res.redirect("/");
+  });
+});
+app.post("/users/register", (req, res) => {
+  User.create(req.body, (error) => {
+    console.log(error);
     res.redirect("/");
   });
 });
