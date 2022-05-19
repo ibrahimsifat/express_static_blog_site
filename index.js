@@ -4,11 +4,6 @@ const ejs = require("ejs");
 const path = require("path");
 const User = require("./models/User");
 app.use(express.json());
-//user registration
-const newUserController = require("./newUser");
-app.get("/auth/register", newUserController);
-const storeUserController = require("./storeUser");
-// app.post("/users/register", storeUserController);
 
 // file upload schema
 const BlogPost = require("./models/BlogPost");
@@ -71,7 +66,7 @@ app.get("/post", (req, res) => {
 app.get("/posts/new", (req, res) => {
   res.render("create");
 });
-
+// post nre post
 app.post("/posts/store", (req, res) => {
   let image = req.files.image;
   image.mv(path.resolve(__dirname, "public/img", image.name), async (error) => {
@@ -82,13 +77,18 @@ app.post("/posts/store", (req, res) => {
     res.redirect("/");
   });
 });
+
+// create a user by registration
 app.post("/users/register", (req, res) => {
   User.create(req.body, (error) => {
     console.log(error);
     res.redirect("/");
   });
 });
-
+//user registration
+app.get("/auth/register", (req, res) => {
+  res.render("register"); // render register.ejs
+});
 // find post
 app.get("/post/:id", async (req, res) => {
   const blogpost = await BlogPost.findById(req.params.id);
